@@ -1,39 +1,61 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import Keycloak from "keycloak-js";
+
+// Initialize Keycloak
+const keycloak = new Keycloak({
+  url: "http://localhost:8080",
+  realm: "master",
+  clientId: "nextjs-app",
+});
+
+
 
 const Login: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<{ name?: string; email?: string } | null>(null);
 
-  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); // ✅ Prevent page reload
-  
-    console.log("Login button clicked"); // Debugging log
-  
-    if (email === "admin@example.com" && password === "password") {
-      console.log("Credentials are correct! Redirecting...");
-  
-      localStorage.setItem("auth", "true");
-  
-      // ✅ Ensure redirection works properly
-      setTimeout(() => {
-        window.location.href = "/dashboard"; // or use window.location.replace
-      }, 0);
-    } else {
-      console.log("Invalid credentials!");
-      alert("Invalid Credentials");
-    }
+
+
+  useEffect(() => {
+    keycloak
+      .init({ onLoad: "check-sso", checkLoginIframe: true })
+      .then((authenticated) => {
+        setIsAuthenticated(authenticated);
+        if (authenticated) {
+          setUser({
+            name: keycloak.tokenParsed?.preferred_username,
+            email: keycloak.tokenParsed?.email,
+          });
+
+          // Store token in a cookie for session sharing
+          document.cookie = `auth_token=${keycloak.token}; Path=/; Domain=.example.com; Secure; HttpOnly; SameSite=None`;
+        }
+      })
+      .catch((error) => console.error("Keycloak initialization error:", error));
+  }, []);
+
+  const handleLogin = () => {
+    keycloak.login();
   };
-  
+
+  const handleLogout = () => {
+    keycloak.logout();
+  };
 
   return (
     <div className="container">
-      <h2>Login</h2>
-      <form onSubmit={handleLogin}>
-        <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-        <button type="submit">Login</button>
-      </form>
-      <p>Don't have an account? <a href="/signup">Sign up</a></p>
+      <h1>Welcome to Example.com</h1>
+      {isAuthenticated ? (
+        <>
+          <p>✅ Logged in as {user?.name} ({user?.email})</p>
+          <button onClick={handleLogout}>Logout</button>
+        </>
+      ) : (
+        <>
+          <p>❌ Not logged in</p>
+          <button onClick={handleLogin}>Login with Keycloak</button>
+        </>
+      )}
     </div>
   );
 };
