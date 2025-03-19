@@ -1,12 +1,20 @@
 export async function getToken(payload: ClientCredentialTokenPayloadDto) {
     try {
-      if (
-        'client_credentials' !== payload.grant_type ||
-        !payload.client_id ||
-        !payload.client_secret
-      ) {
-        throw new Error('Invalid inputs while getting token.');
-      }
+    console.log("This is email inside 5");
+    const req_payload = new URLSearchParams({
+      grant_type: payload.grant_type!,
+      client_id: payload.client_id!,
+      client_secret: payload.client_secret!
+    });
+
+    //   if (
+    //     'client_credentials' !== payload.grant_type ||
+    //     !payload.client_id ||
+    //     !payload.client_secret
+    //   ) {
+    //     throw new Error('Invalid inputs while getting token.');
+    //   }
+    console.log("This is email inside 11");
       const strURL = GetSATURL("master");
       console.log(`getToken URL: ${strURL}`);
     //   const config = {
@@ -14,13 +22,16 @@ export async function getToken(payload: ClientCredentialTokenPayloadDto) {
     //       'Content-Type': 'application/x-www-form-urlencoded'
     //     }
     //   };
+    console.log("This is email inside 12", JSON.stringify(payload));
       const tokenResponse = await fetch(strURL, {
         method: "POST",
         headers: {
+          //   "Content-Type": "application/json",
           "Content-Type": "application/x-www-form-urlencoded",
         },
-        body: JSON.stringify(payload),
+        body: req_payload,
       });
+    console.log("This is email inside 13");
 
       if (!tokenResponse.ok) {
         const errorData = await tokenResponse.json();
@@ -30,6 +41,7 @@ export async function getToken(payload: ClientCredentialTokenPayloadDto) {
     //     await GetSATURL(process.env.KEYCLOAK_REALM),
     //     qs.stringify(payload)
     //     , config);
+    console.log("This is email inside 14");
 
       return tokenResponse;
     } catch (error) {
