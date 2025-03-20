@@ -1,5 +1,15 @@
 ---
 import LoginComponent from "../components/Login";
+// import { checkUserSession } from "../lib/auth";
+
+// const response = await checkUserSession({
+//   cookies: Astro.cookies,
+//   currentPath: Astro.url.pathname,
+// });
+// const route: string = "/login";
+// if (!response.authorized) {
+//   return Astro.redirect(response.redirect);
+// }
 ---
 
 <LoginComponent client:only="react" />
