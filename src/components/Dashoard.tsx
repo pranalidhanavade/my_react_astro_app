@@ -1,38 +1,53 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-const Dashboard: React.FC = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+const Dashboard = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const getCookie = (name) => {
-  const cookies = document.cookie.split("; ");
-  for (const cookie of cookies) {
-    const [key, value] = cookie.split("=");
-    if (key === name) {
-      return decodeURIComponent(value);
-    }
-  }
-  return null;
-};
   useEffect(() => {
-    
-    const auth = getCookie("session");
-    console.log("Reached document.cookie", document.cookie)
-    console.log("Reached inside auth", auth)
-    if (auth) {
+    const getCookie = (name: string) => {
+      const cookies = document.cookie.split("; ");
+      for (const cookie of cookies) {
+        const [key, value] = cookie.split("=");
+        if (key === name) {
+          return decodeURIComponent(value);
+        }
+      }
+      return null;
+    };
+
+    const session = getCookie("session");
+    if (session) {
       setIsAuthenticated(true);
     } else {
-      window.location.href = "/login"; // Redirect only if auth fails
+      window.location.href = "/login"; 
     }
   }, []);
 
-  if (isAuthenticated === null) {
-    return <p>Loading...</p>; // Prevent render flicker
-  }
-
   return (
-    <div className="container">
-      <h2>Welcome to the Dashboard</h2>
-      <p>You are successfully logged in.</p>
+    <div className="dashboard-container">
+      {isAuthenticated ? <h2>Welcome to Astro Dashboard</h2> : <p>Loading...</p>}
+      
+      <style>
+        {`
+          .dashboard-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            background: #f5f5f5;
+          }
+          h2 {
+            color: #333;
+            font-size: 24px;
+            font-weight: bold;
+          }
+          p {
+            color: #666;
+            font-size: 18px;
+          }
+        `}
+      </style>
     </div>
   );
 };
